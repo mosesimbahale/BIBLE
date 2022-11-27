@@ -44,7 +44,7 @@ const Home = () => {
           </div>
           <div className="flex flex-col w-full lg:w-1/2">
             <img
-              src="https://res.cloudinary.com/di3ucl5oh/image/upload/v1667724902/AdobeStock_361257750_bxvgun.jpg"
+              src="https://res.cloudinary.com/dlw9hjlzv/image/upload/v1668413312/BIBLE/landing/AdobeStock_355507141_wair2n.jpg"
               alt="church"
               className="w-full h-full object-contain"
             />
