@@ -25,6 +25,7 @@ function App() {
         <Route path="/signin" element={<Signin />} />
         <Route path="/signup" element={<Signup />} />
 
+
         {/* LANDING */}
 
         <Route path="/" element={<Home />} />
