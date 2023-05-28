@@ -1,121 +1,53 @@
-/**
- * By default, Remix will handle generating the HTTP Response for you.
- * You are free to delete this file if you'd like to, but if you ever want it revealed again, you can run `npx remix reveal` ✨
- * For more information, see https://remix.run/file-conventions/entry.server
- */
-
-import { PassThrough } from "node:stream";
-
-import { Response } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
-import isbot from "isbot";
-import { renderToPipeableStream } from "react-dom/server";
+import { renderToString } from "react-dom/server";
+import {
+  ApolloProvider,
+  ApolloClient,
+  InMemoryCache,
+  createHttpLink,
+} from "@apollo/client";
+import { getDataFromTree } from "@apollo/client/react/ssr";
 
-const ABORT_DELAY = 5_000;
-
-export default function handleRequest(
+export default async function handleRequest(
   request,
   responseStatusCode,
   responseHeaders,
   remixContext
 ) {
-  return isbot(request.headers.get("user-agent"))
-    ? handleBotRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        remixContext
-      )
-    : handleBrowserRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        remixContext
-      );
-}
-
-function handleBotRequest(
-  request,
-  responseStatusCode,
-  responseHeaders,
-  remixContext
-) {
-  return new Promise((resolve, reject) => {
-    const { pipe, abort } = renderToPipeableStream(
-      <RemixServer
-        context={remixContext}
-        url={request.url}
-        abortDelay={ABORT_DELAY}
-      />,
-
-      {
-        onAllReady() {
-          const body = new PassThrough();
-
-          responseHeaders.set("Content-Type", "text/html");
-
-          resolve(
-            new Response(body, {
-              headers: responseHeaders,
-              status: responseStatusCode,
-            })
-          );
-
-          pipe(body);
-        },
-        onShellError(error) {
-          reject(error);
-        },
-        onError(error) {
-          responseStatusCode = 500;
-          console.error(error);
-        },
-      }
-    );
-
-    setTimeout(abort, ABORT_DELAY);
+  const client = new ApolloClient({
+    ssrMode: true,
+    link: createHttpLink({
+      uri: "https://main--droid-pa-team-super-graph.apollographos.net/graphql",
+    }),
+    cache: new InMemoryCache(),
   });
-}
 
-function handleBrowserRequest(
-  request,
-  responseStatusCode,
-  responseHeaders,
-  remixContext
-) {
-  return new Promise((resolve, reject) => {
-    const { pipe, abort } = renderToPipeableStream(
-      <RemixServer
-        context={remixContext}
-        url={request.url}
-        abortDelay={ABORT_DELAY}
-      />,
+  const App = (
+    <ApolloProvider client={client}>
+      <RemixServer context={remixContext} url={request.url} />
+    </ApolloProvider>
+  );
 
-      {
-        onShellReady() {
-          const body = new PassThrough();
-
-          responseHeaders.set("Content-Type", "text/html");
-
-          resolve(
-            new Response(body, {
-              headers: responseHeaders,
-              status: responseStatusCode,
-            })
-          );
-
-          pipe(body);
-        },
-        onShellError(error) {
-          reject(error);
-        },
-        onError(error) {
-          console.error(error);
-          responseStatusCode = 500;
-        },
-      }
+  return getDataFromTree(App).then(() => {
+    const initialState = client.extract();
+    const markup = renderToString(
+      <>
+        {App}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.__APOLLO_STATE__=${JSON.stringify(
+              initialState
+            ).replace(/</g, "\\u003c")}`, // The replace call escapes the < character to prevent cross-site scripting attacks that are possible via the presence of </script> in a string literal
+          }}
+        />
+      </>
     );
 
-    setTimeout(abort, ABORT_DELAY);
+    responseHeaders.set("Content-Type", "text/html");
+
+    return new Response("<!DOCTYPE html>" + markup, {
+      status: responseStatusCode,
+      headers: responseHeaders,
+    });
   });
 }

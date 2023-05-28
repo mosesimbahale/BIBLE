@@ -4,15 +4,31 @@
  * For more information, see https://remix.run/file-conventions/entry.client
  */
 
-import { RemixBrowser } from "@remix-run/react";
-import { startTransition, StrictMode } from "react";
-import { hydrateRoot } from "react-dom/client";
+// import { RemixBrowser } from "@remix-run/react";
+// import { startTransition, StrictMode } from "react";
+// import { hydrateRoot } from "react-dom/client";
 
-startTransition(() => {
-  hydrateRoot(
-    document,
-    <StrictMode>
-      <RemixBrowser />
-    </StrictMode>
-  );
+// startTransition(() => {
+//   hydrateRoot(
+//     document,
+//     <StrictMode>
+//       <RemixBrowser />
+//     </StrictMode>
+//   );
+// });
+
+import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
+import { RemixBrowser } from "@remix-run/react";
+import { hydrate } from "react-dom";
+
+const client = new ApolloClient({
+  uri: "https://main--droid-pa-team-super-graph.apollographos.net/graphql",
+  cache: new InMemoryCache(),
 });
+
+hydrate(
+  <ApolloProvider client={client}>
+    <RemixBrowser />
+  </ApolloProvider>,
+  document
+);
