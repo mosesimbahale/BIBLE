@@ -22,7 +22,7 @@ import { RemixBrowser } from "@remix-run/react";
 import { hydrate } from "react-dom";
 
 const client = new ApolloClient({
-  uri: "https://main--droid-pa-team-super-graph.apollographos.net/graphql",
+  uri: "https://christianity-server.onrender.com/graphql",
   cache: new InMemoryCache(),
 });
 

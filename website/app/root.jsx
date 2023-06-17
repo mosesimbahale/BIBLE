@@ -23,7 +23,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body style={{ fontFamily: 'Nunito' }}>
+      <body style={{ fontFamily: 'WorkSans' }}>
         <Outlet />
         <ScrollRestoration />
         <Scripts />

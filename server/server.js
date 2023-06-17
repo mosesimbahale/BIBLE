@@ -9,8 +9,6 @@ const resolvers = require("./resolvers");
 // Load env variables
 dotenv.config({ path: "./.env" });
 
-
-
 async function startServer() {
   // Connect to MongoDB Atlas
   await mongoose.connect(process.env.MONGODB_URI, {
@@ -38,8 +36,8 @@ async function startServer() {
     res.type("html").send(html);
   });
 
-  app.listen({ port: 4002 }, () =>
-    console.log(`🚀 Server ready at http://localhost:4002${server.graphqlPath}`)
+  app.listen({ port: 4000 }, () =>
+    console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
   );
 }
 

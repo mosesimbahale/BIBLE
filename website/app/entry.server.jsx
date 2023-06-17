@@ -17,7 +17,7 @@ export default async function handleRequest(
   const client = new ApolloClient({
     ssrMode: true,
     link: createHttpLink({
-      uri: "https://main--droid-pa-team-super-graph.apollographos.net/graphql",
+      uri: "https://christianity-server.onrender.com/graphql",
     }),
     cache: new InMemoryCache(),
   });
